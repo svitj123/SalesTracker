@@ -1,12 +1,20 @@
+import { useState } from "react";
 import Layout from "@/components/layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useReportStore } from "@/lib/store";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { ArrowUpRight, Timer, Users, Target, ShoppingBag, Percent } from "lucide-react";
+import { ArrowUpRight, Timer, Target, ShoppingBag, Percent, Users, Calendar, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Dashboard() {
-  const { reports, getStats } = useReportStore();
-  const stats = getStats();
+  const { getStats, getFilteredReports, getAgents } = useReportStore();
+  const [selectedAgent, setSelectedAgent] = useState<string>("all");
+  const [timeframe, setTimeframe] = useState<"current" | "all">("current");
+
+  const agents = getAgents();
+  const stats = getStats({ agent: selectedAgent, month: timeframe });
+  const reports = getFilteredReports({ agent: selectedAgent, month: timeframe });
 
   // Prepare Chart Data
   const dailyData = reports.map(r => ({
@@ -26,18 +34,60 @@ export default function Dashboard() {
       acc.push({ name: r.lokacija, value: r.fix + r.mob });
     }
     return acc;
-  }, [] as { name: string; value: number }[]).sort((a, b) => b.value - a.value);
+  }, [] as { name: string; value: number }[]).sort((a, b) => b.value - a.value).slice(0, 5);
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+  // Agent Leaderboard Data (only show if "All Agents" is selected)
+  const agentLeaderboard = selectedAgent === "all" ? (() => {
+    const agentStats: Record<string, number> = {};
+    reports.forEach(r => {
+      const name = r.agent || "Unknown";
+      agentStats[name] = (agentStats[name] || 0) + r.fix + r.mob;
+    });
+    return Object.entries(agentStats)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  })() : [];
+
+
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
   return (
     <Layout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Overview of sales performance and agent metrics.
-          </p>
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              {selectedAgent === 'all' ? 'Team Performance' : `${selectedAgent}'s Performance`}
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3">
+             <div className="flex items-center gap-2 bg-card border rounded-lg p-1">
+               <Filter className="h-4 w-4 ml-2 text-muted-foreground" />
+               <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+                <SelectTrigger className="w-[180px] border-0 shadow-none bg-transparent focus:ring-0">
+                  <SelectValue placeholder="Select Agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Agents</SelectItem>
+                  {agents.map(agent => (
+                    <SelectItem key={agent} value={agent}>{agent}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+             </div>
+
+             <div className="flex items-center gap-2 bg-card border rounded-lg p-1">
+                <Calendar className="h-4 w-4 ml-2 text-muted-foreground" />
+                <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v as "current" | "all")} className="w-[200px]">
+                  <TabsList className="grid w-full grid-cols-2 bg-transparent h-8 p-0">
+                    <TabsTrigger value="current" className="text-xs h-8 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">This Month</TabsTrigger>
+                    <TabsTrigger value="all" className="text-xs h-8 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">All Time</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+             </div>
+          </div>
         </div>
 
         {/* Key Stats Row */}
@@ -55,7 +105,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           
-          {/* Updated to Sales Success Rate */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
@@ -64,7 +113,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.salesSuccessRate.toFixed(1)}%</div>
               <p className="text-xs text-muted-foreground">
-                Fix Sales / Contacts (Odzvani)
+                Fix Sales / Contacts
               </p>
             </CardContent>
           </Card>
@@ -87,9 +136,9 @@ export default function Dashboard() {
               <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{reports.length}</div>
+              <div className="text-2xl font-bold">{stats.reportCount}</div>
               <p className="text-xs text-muted-foreground">
-                Submitted this month
+                Submitted in selected period
               </p>
             </CardContent>
           </Card>
@@ -100,6 +149,7 @@ export default function Dashboard() {
           <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Sales Trend</CardTitle>
+              <CardDescription>Daily performance breakdown</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <div className="h-[300px] w-full">
@@ -131,17 +181,23 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+          
           <Card className="col-span-3">
             <CardHeader>
-              <CardTitle>Top Locations</CardTitle>
+              <CardTitle>
+                {selectedAgent === 'all' ? 'Top Agents' : 'Top Locations'}
+              </CardTitle>
+              <CardDescription>
+                {selectedAgent === 'all' ? 'By total sales volume' : 'Where sales are happening'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
                <div className="h-[300px] w-full">
-                 {locationPerformance.length > 0 ? (
+                 {(selectedAgent === 'all' ? agentLeaderboard : locationPerformance).length > 0 ? (
                    <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={locationPerformance}
+                        data={selectedAgent === 'all' ? agentLeaderboard : locationPerformance}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -150,7 +206,7 @@ export default function Dashboard() {
                         paddingAngle={5}
                         dataKey="value"
                       >
-                        {locationPerformance.map((entry, index) => (
+                        {(selectedAgent === 'all' ? agentLeaderboard : locationPerformance).map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
