@@ -1,0 +1,184 @@
+I want you to generate a complete production-ready web application with the following specifications. Do not simplify anything. Build the full system.
+
+PROJECT DESCRIPTION
+Build a full-stack web application that allows me to paste weekly agent sales reports in a text box, parses the report, stores it in a database, and generates sales statistics.
+Reports look like this:
+
+Brezovica
+Obiskani: 13
+Odzvani: 6
+Fix: 2
+Mob: 3
+VS: 1
+TW: 1
+Ure: 4,5
+(Žitko, Ožegović)
+
+Notes:
+- Only Fix and Mob count as sales.
+- Other fields are used for analytics.
+- Last line in parentheses contains customer last names, separated by commas.
+- Decimal numbers may use comma or dot.
+- Some fields (VS, TW) may be missing.
+- Location is always the first line.
+- I will paste multiple reports every week.
+
+TECH STACK
+Backend:
+- Python FastAPI
+- Endpoints must include:
+  - /parse-report
+  - /save-report
+  - /get-reports
+  - /get-stats
+  - /get-monthly-sales
+  - /delete-report/{id}
+
+Frontend:
+- Streamlit (hosted separately)
+- Features:
+  - Textarea to paste a report
+  - Button: “Add report”
+  - Table of all saved reports
+  - Monthly sales dashboard
+  - Graphs (Fix + Mob totals, conversion rate, hours worked, etc.)
+
+Database:
+- Supabase (PostgreSQL)
+- Table: reports
+  - id (uuid)
+  - timestamp (created_at)
+  - lokacija
+  - obiskani
+  - odzvani
+  - fix
+  - mob
+  - vs
+  - tw
+  - ure
+  - priimki (text array)
+  - raw_text (complete pasted report)
+
+Use SQLAlchemy models.
+
+REPORT PARSER LOGIC
+Create a Python parser that:
+- Extracts values after keywords:
+  - Obiskani
+  - Odzvani
+  - Fix
+  - Mob
+  - VS
+  - TW
+  - Ure
+- Accepts both comma and dot decimals
+- Converts commas → dots
+- Extracts last names from parentheses in last line:
+  - (Žitko, Ožegović) → ["Žitko", "Ožegović"]
+- Returns structured JSON:
+
+{
+  "lokacija": "Brezovica",
+  "obiskani": 13,
+  "odzvani": 6,
+  "fix": 2,
+  "mob": 3,
+  "vs": 1,
+  "tw": 1,
+  "ure": 4.5,
+  "priimki": ["Žitko", "Ožegović"]
+}
+
+Backend must save:
+- parsed JSON
+- raw text
+
+STATS API REQUIREMENTS
+/get-stats must return:
+- total Fix
+- total Mob
+- total sales this month (Fix + Mob)
+- average conversion (Odzvani / Obiskani)
+- total hours
+- ranking of locations by sales
+- all priimki grouped by day/week
+
+/get-monthly-sales:
+- Return grouped daily and weekly totals.
+
+FRONTEND REQUIREMENTS (STREAMLIT)
+Create pages:
+
+Home
+- Text area: "Paste weekly report"
+- Button: "Add report"
+- Display parsed preview before saving
+- On success → "Report added"
+
+Reports Table
+- Table with all reports from the database
+- Button to delete report
+
+Dashboard
+- Sales for month: Fix, Mob, Total
+- Conversion rates
+- Graphs:
+  - Daily Fix + Mob
+  - Weekly totals
+  - Hours worked
+  - Locations ranked
+
+Customers
+- List of all priimki (names)
+- Grouped by date and location
+
+Use Plotly for all graphs.
+
+DEPLOYMENT INSTRUCTIONS
+Generate:
+- README.md with deployment steps:
+  - How to deploy backend on Render (Free Tier)
+  - How to deploy Streamlit front-end on Vercel or Streamlit Cloud
+  - How to connect to Supabase
+  - Environment variables required
+
+Include .env.example with:
+
+SUPABASE_URL=
+SUPABASE_KEY=
+
+PROJECT STRUCTURE
+Use this structure:
+
+/
+backend/
+    main.py
+    models.py
+    database.py
+    parser.py
+    routers/
+        reports.py
+frontend/
+    streamlit_app.py
+README.md
+
+DELIVERABLES
+Replit must output a complete working project, including:
+- Fully functional FastAPI backend
+- Fully functional Streamlit frontend
+- Fully functional report parser
+- Complete REST API
+- Supabase schema SQL
+- All Python code
+- All requirements.txt files
+- Deployment instructions
+- Example reports for testing
+
+IMPORTANT RULES
+- Do NOT leave placeholders, except for required environment secrets which must be documented in .env.example.
+- Do NOT oversimplify any part.
+- Everything must be production grade.
+- All endpoints must be fully implemented.
+- Parser must handle missing fields safely.
+
+Build the complete project now.
