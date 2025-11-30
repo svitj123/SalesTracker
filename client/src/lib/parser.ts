@@ -84,8 +84,8 @@ export function parseReport(text: string): ParsedReport {
     odzvani: getValue('Odzvani'),
     fix: getValue('Fix'),
     mob: getValue('Mob'),
-    vs: getValue(/Varni splet \(VS\)|VS/), // Support both "Varni splet (VS)" and just "VS"
-    tw: getValue(/Turbo WiFi \(TW\)|TW/), // Support both "Turbo WiFi (TW)" and just "TW"
+    vs: getValue(/(?:Varni splet \(VS\)|VS)/), // Support both "Varni splet (VS)" and just "VS"
+    tw: getValue(/(?:Turbo WiFi \(TW\)|TW)/), // Support both "Turbo WiFi (TW)" and just "TW"
     ure: getValue('Ure'), // Regex in getValue handles numbers, we just need to ensure it stops before 'h' if present
     priimki: getPriimki(),
   };
