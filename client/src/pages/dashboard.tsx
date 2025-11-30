@@ -2,7 +2,7 @@ import Layout from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useReportStore } from "@/lib/store";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { ArrowUpRight, Timer, Users, Target, ShoppingBag } from "lucide-react";
+import { ArrowUpRight, Timer, Users, Target, ShoppingBag, Percent } from "lucide-react";
 
 export default function Dashboard() {
   const { reports, getStats } = useReportStore();
@@ -14,7 +14,8 @@ export default function Dashboard() {
     Fix: r.fix,
     Mob: r.mob,
     Total: r.fix + r.mob,
-    location: r.lokacija
+    location: r.lokacija,
+    agent: r.agent || 'Unknown'
   })).reverse();
 
   const locationPerformance = reports.reduce((acc, r) => {
@@ -28,11 +29,6 @@ export default function Dashboard() {
   }, [] as { name: string; value: number }[]).sort((a, b) => b.value - a.value);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
-  const conversionData = reports.map(r => ({
-    name: r.lokacija,
-    rate: r.obiskani > 0 ? (r.odzvani / r.obiskani) * 100 : 0
-  }));
 
   return (
     <Layout>
@@ -58,18 +54,21 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+          
+          {/* Updated to Sales Success Rate */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+              <Percent className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.avgConversion.toFixed(1)}%</div>
+              <div className="text-2xl font-bold">{stats.salesSuccessRate.toFixed(1)}%</div>
               <p className="text-xs text-muted-foreground">
-                Odzvani / Obiskani
+                Fix Sales / Contacts (Odzvani)
               </p>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Hours</CardTitle>
@@ -113,6 +112,12 @@ export default function Dashboard() {
                       <Tooltip 
                         contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
                         itemStyle={{ color: 'hsl(var(--foreground))' }}
+                        labelFormatter={(label, payload) => {
+                           if (payload && payload.length > 0 && payload[0].payload.agent) {
+                             return `${label} (${payload[0].payload.agent})`;
+                           }
+                           return label;
+                        }}
                       />
                       <Legend />
                       <Bar dataKey="Fix" stackId="a" fill="#4ade80" radius={[0, 0, 4, 4]} />

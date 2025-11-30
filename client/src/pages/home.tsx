@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { parseReport, ParsedReport } from "@/lib/parser";
 import { useReportStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLocation } from "wouter";
 import { v4 as uuidv4 } from 'uuid';
@@ -72,20 +72,21 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <Textarea
-                  placeholder={`Brezovica
-Obiskani: 13
-Odzvani: 6
-Fix: 2
-Mob: 3
-VS: 1
-TW: 1
-Ure: 4,5
-(Žitko, Ožegović)`}
+                  placeholder={`Tilen Udovč:
+Teren: Notranje gorice, Brezovica
+Obiskani: 73
+Odzvani: 35
+Fix: 3
+Mob: 4
+Varni splet (VS): 2
+Turbo WiFi (TW): 0
+Dodatno: /
+Ure: 15h
+Priimki strank: Gracelj, Škofic, Armič`}
                   className="min-h-[300px] font-mono text-sm"
                   value={text}
                   onChange={(e) => {
                     setText(e.target.value);
-                    // Debounce parse could go here, but manual for now is fine or effect
                     if (e.target.value.trim() === "") setParsed(null);
                   }}
                   onKeyUp={handleParse}
@@ -126,6 +127,13 @@ Ure: 4,5
 
                 {parsed && (
                   <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                     {parsed.agent && (
+                      <div className="p-2 bg-primary/10 rounded text-center mb-2">
+                         <div className="text-xs text-muted-foreground uppercase tracking-wider">Agent</div>
+                         <div className="font-bold text-primary">{parsed.agent}</div>
+                      </div>
+                     )}
+
                     <div className="p-4 bg-accent/20 rounded-lg border border-accent/20">
                       <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-xs mb-1">Location</div>
                       <div className="text-2xl font-bold text-primary">{parsed.lokacija}</div>
@@ -159,13 +167,13 @@ Ure: 4,5
                     </div>
 
                     <div>
-                      <div className="text-xs text-muted-foreground mb-2">Agents</div>
+                      <div className="text-xs text-muted-foreground mb-2">Customers</div>
                       <div className="flex flex-wrap gap-2">
-                        {parsed.priimki.map((name, i) => (
+                        {parsed.priimki.length > 0 ? parsed.priimki.map((name, i) => (
                           <span key={i} className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs font-medium">
                             {name}
                           </span>
-                        ))}
+                        )) : <span className="text-xs text-muted-foreground italic">None found</span>}
                       </div>
                     </div>
                   </div>

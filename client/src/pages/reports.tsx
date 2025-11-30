@@ -41,8 +41,9 @@ export default function Reports() {
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
+                <TableHead>Agent</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead>Agents</TableHead>
+                <TableHead>Customers</TableHead>
                 <TableHead className="text-right">Fix</TableHead>
                 <TableHead className="text-right">Mob</TableHead>
                 <TableHead className="text-right">Hours</TableHead>
@@ -52,7 +53,7 @@ export default function Reports() {
             <TableBody>
               {reports.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                     No reports found. Go to Home to add one.
                   </TableCell>
                 </TableRow>
@@ -62,14 +63,20 @@ export default function Reports() {
                     <TableCell className="font-medium">
                       {format(new Date(report.created_at), "MMM d, yyyy")}
                     </TableCell>
+                    <TableCell className="font-medium text-primary">
+                      {report.agent || '-'}
+                    </TableCell>
                     <TableCell>{report.lokacija}</TableCell>
                     <TableCell>
-                      <div className="flex gap-1 flex-wrap">
-                        {report.priimki.map((p, i) => (
-                          <span key={i} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                      <div className="flex gap-1 flex-wrap max-w-[200px]">
+                        {report.priimki.slice(0, 3).map((p, i) => (
+                          <span key={i} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors border-transparent bg-secondary text-secondary-foreground">
                             {p}
                           </span>
                         ))}
+                        {report.priimki.length > 3 && (
+                           <span className="text-xs text-muted-foreground self-center">+{report.priimki.length - 3} more</span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-mono">{report.fix}</TableCell>
