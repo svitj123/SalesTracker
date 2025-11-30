@@ -17,8 +17,8 @@ export default function Reports() {
   const { reports, deleteReport } = useReportStore();
   const { toast } = useToast();
 
-  const handleDelete = (id: string) => {
-    deleteReport(id);
+  const handleDelete = async (id: number) => {
+    await deleteReport(id);
     toast({
       title: "Report Deleted",
       description: "The report has been removed from the database.",

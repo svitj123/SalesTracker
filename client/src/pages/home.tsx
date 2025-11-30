@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLocation } from "wouter";
-import { v4 as uuidv4 } from 'uuid';
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -34,24 +33,30 @@ export default function Home() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!parsed) return;
 
-    addReport({
-      id: uuidv4(),
-      created_at: new Date().toISOString(),
-      ...parsed,
-      raw_text: text,
-    });
+    try {
+      await addReport({
+        ...parsed,
+        raw_text: text,
+      });
 
-    toast({
-      title: "Report Saved",
-      description: `Sales report for ${parsed.lokacija} has been added.`,
-    });
+      toast({
+        title: "Report Saved",
+        description: `Sales report for ${parsed.lokacija} has been added.`,
+      });
 
-    setText("");
-    setParsed(null);
-    setLocation("/dashboard");
+      setText("");
+      setParsed(null);
+      setLocation("/dashboard");
+    } catch (e) {
+       toast({
+        title: "Error",
+        description: "Failed to save report. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

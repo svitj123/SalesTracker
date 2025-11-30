@@ -8,6 +8,8 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import Reports from "@/pages/reports";
 import Customers from "@/pages/customers";
+import { useEffect } from "react";
+import { useReportStore } from "@/lib/store";
 
 function Router() {
   return (
@@ -22,6 +24,12 @@ function Router() {
 }
 
 function App() {
+  const fetchReports = useReportStore((state) => state.fetchReports);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
