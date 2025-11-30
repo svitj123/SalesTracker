@@ -1,0 +1,45 @@
+Brezovica
+Obiskani: 13
+Odzvani: 6
+Fix: 2
+Mob: 3
+VS: 1
+TW: 1
+Ure: 4,5
+(Žitko, Ožegović)
+
+---
+
+Ljubljana Center
+Obiskani: 25
+Odzvani: 12
+Fix: 5
+Mob: 4
+VS: 2
+TW: 0
+Ure: 6.5
+(Novak, Horvat)
+
+---
+
+Maribor
+Obiskani: 10
+Odzvani: 3
+Fix: 1
+Mob: 0
+VS: 0
+TW: 0
+Ure: 3
+(Kovačič)
+
+---
+
+Koper
+Obiskani: 18
+Odzvani: 9
+Fix: 3
+Mob: 2
+VS: 1
+TW: 1
+Ure: 5,0
+(Vidmar, Zupančič)
