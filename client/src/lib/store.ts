@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { isSameMonth, parseISO } from 'date-fns';
+import { isSameMonth, isSameWeek, parseISO } from 'date-fns';
 
 export interface Report {
   id: string;
@@ -33,8 +33,8 @@ interface ReportStore {
   addReport: (report: Report) => void;
   deleteReport: (id: string) => void;
   getAgents: () => string[];
-  getStats: (filter?: { agent?: string | 'all', month?: 'current' | 'all' }) => Stats;
-  getFilteredReports: (filter?: { agent?: string | 'all', month?: 'current' | 'all' }) => Report[];
+  getStats: (filter?: { agent?: string | 'all', timeframe?: 'week' | 'month' | 'all' }) => Stats;
+  getFilteredReports: (filter?: { agent?: string | 'all', timeframe?: 'week' | 'month' | 'all' }) => Report[];
 }
 
 export const useReportStore = create<ReportStore>()(
@@ -61,7 +61,10 @@ export const useReportStore = create<ReportStore>()(
           filtered = filtered.filter(r => r.agent === filter.agent);
         }
 
-        if (filter?.month === 'current') {
+        if (filter?.timeframe === 'week') {
+          const now = new Date();
+          filtered = filtered.filter(r => isSameWeek(parseISO(r.created_at), now, { weekStartsOn: 1 })); // Monday start
+        } else if (filter?.timeframe === 'month') {
           const now = new Date();
           filtered = filtered.filter(r => isSameMonth(parseISO(r.created_at), now));
         }

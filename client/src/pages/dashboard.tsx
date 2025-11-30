@@ -10,11 +10,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Dashboard() {
   const { getStats, getFilteredReports, getAgents } = useReportStore();
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
-  const [timeframe, setTimeframe] = useState<"current" | "all">("current");
+  const [timeframe, setTimeframe] = useState<"week" | "month" | "all">("week");
 
   const agents = getAgents();
-  const stats = getStats({ agent: selectedAgent, month: timeframe });
-  const reports = getFilteredReports({ agent: selectedAgent, month: timeframe });
+  const stats = getStats({ agent: selectedAgent, timeframe });
+  const reports = getFilteredReports({ agent: selectedAgent, timeframe });
 
   // Prepare Chart Data
   const dailyData = reports.map(r => ({
@@ -80,9 +80,10 @@ export default function Dashboard() {
 
              <div className="flex items-center gap-2 bg-card border rounded-lg p-1">
                 <Calendar className="h-4 w-4 ml-2 text-muted-foreground" />
-                <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v as "current" | "all")} className="w-[200px]">
-                  <TabsList className="grid w-full grid-cols-2 bg-transparent h-8 p-0">
-                    <TabsTrigger value="current" className="text-xs h-8 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">This Month</TabsTrigger>
+                <Tabs value={timeframe} onValueChange={(v) => setTimeframe(v as "week" | "month" | "all")} className="w-[300px]">
+                  <TabsList className="grid w-full grid-cols-3 bg-transparent h-8 p-0">
+                    <TabsTrigger value="week" className="text-xs h-8 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">This Week</TabsTrigger>
+                    <TabsTrigger value="month" className="text-xs h-8 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">This Month</TabsTrigger>
                     <TabsTrigger value="all" className="text-xs h-8 data-[state=active]:bg-primary/10 data-[state=active]:text-primary">All Time</TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -149,7 +150,7 @@ export default function Dashboard() {
           <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Sales Trend</CardTitle>
-              <CardDescription>Daily performance breakdown</CardDescription>
+              <CardDescription>Performance breakdown</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <div className="h-[300px] w-full">
