@@ -69,9 +69,15 @@ If you have Node.js installed on your computer:
 2.  Go to the **Shell** tab in your Render service dashboard.
 3.  Run: `npm run db:push`
 
-## Step 5: Done!
+## Troubleshooting
 
-Your app is now running 24/7 on the URL provided by Render (e.g., `https://sales-tracker.onrender.com`).
+**"tsx: not found" error on Render**
+If you see this error, it means the build dependencies weren't installed in production mode.
+Fix it by running this command locally before pushing to GitHub:
+```bash
+npm install tsx esbuild typescript --save
+```
+Then commit and push the changes.
 
 ---
 
